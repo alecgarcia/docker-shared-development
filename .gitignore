@@ -1,0 +1,4 @@
+.env
+sail-meilisearch
+sail-mysql
+sail-pgsql
