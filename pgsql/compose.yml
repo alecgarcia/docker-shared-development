@@ -1,0 +1,19 @@
+services:
+  pgsql:
+    image: 'postgres:13'
+    ports:
+      - '${PSQL_DB_PORT:-5432}:5432'
+    environment:
+      PGPASSWORD: '${PSQL_DB_PASSWORD:-secret}'
+      # POSTGRES_DB: '${PSQL_DB_DATABASE}'
+      POSTGRES_USER: '${PSQL_DB_USERNAME}'
+      POSTGRES_PASSWORD: '${PSQL_DB_PASSWORD:-secret}'
+    volumes:
+      - './sail-pgsql:/var/lib/postgresql/data'
+      - './create-testing-database.sql:/docker-entrypoint-initdb.d/create-testing-database.sql'
+    networks:
+      - sail
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${PSQL_DB_DATABASE}", "-U", "${PSQL_DB_USERNAME}" ]
+      retries: 3
+      timeout: 5s

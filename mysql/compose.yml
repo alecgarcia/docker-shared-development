@@ -1,0 +1,26 @@
+services:
+  mysql:
+    image: 'mysql/mysql-server:8.0'
+    ports:
+      - '${FORWARD_DB_PORT:-3306}:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${MYSQL_DB_PASSWORD}'
+      MYSQL_PASSWORD: '${MYSQL_DB_PASSWORD}'
+      MYSQL_USER: '${MYSQL_DB_USERNAME}'
+      MYSQL_DATABASE: '${MYSQL_DB_DATABASE}'
+    volumes:
+      - './sail-mysql:/var/lib/mysql'
+      - './create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+    networks:
+      - sail
+    healthcheck:
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - '-p${MYSQL_DB_PASSWORD}'
+      retries: 3
+      timeout: 5s
+volumes:
+    sail-mysql:
+        driver: local
