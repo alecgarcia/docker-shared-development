@@ -1,6 +1,6 @@
 include:
   - nginx-proxy/compose.yml
-#   - ngrok/compose.yml
+  - ngrok/compose.yml
   - mysql/compose.yml
   - pgsql/compose.yml
   - redis/compose.yml

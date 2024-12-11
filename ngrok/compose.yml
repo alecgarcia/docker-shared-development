@@ -1,13 +1,18 @@
 services:
   ngrok:
-    image: ngrok/ngrok:latest
+    image: ngrok/ngrok
     restart: unless-stopped
-    command:
-      - "start"
-      - "--all"
-      - "--config"
-      - "/etc/ngrok.yml"
+    # command:
+    #   - "start"
+    #   - "--all"
+    #   - "--config"
+    #   - "/etc/ngrok.yml"
     volumes:
-      - ../ngrok.yml:/etc/ngrok.yml
+      - ../ngrok.yml:/ngrok.yml
     ports:
       - 4040:4040
+    environment:
+      # - NGROK_AUTHTOKEN=your_ngrok_authtoken
+      - NGROK_CONFIG=/ngrok.yml
+    networks:
+      - sail
