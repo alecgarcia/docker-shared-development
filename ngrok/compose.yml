@@ -6,7 +6,10 @@ services:
       - ../ngrok.yml:/ngrok.yml
     ports:
       - 4040:4040
-    environment:
-      - NGROK_CONFIG=/ngrok.yml
+    command:
+      - "start"
+      - "--all"
+      - "--config"
+      - "ngrok.yml"
     networks:
       - sail
