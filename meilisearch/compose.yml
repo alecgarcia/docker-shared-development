@@ -1,6 +1,7 @@
 services:
   meilisearch:
     image: 'getmeili/meilisearch:latest'
+    restart: unless-stopped
     ports:
       - '${FORWARD_MEILISEARCH_PORT:-7700}:7700'
     environment:

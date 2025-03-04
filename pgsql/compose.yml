@@ -1,6 +1,7 @@
 services:
   pgsql:
     image: 'postgres:13'
+    restart: unless-stopped
     ports:
       - '${PSQL_DB_PORT:-5432}:5432'
     environment:
