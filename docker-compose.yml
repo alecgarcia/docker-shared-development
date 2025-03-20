@@ -7,6 +7,7 @@ include:
   - meilisearch/compose.yml
   - mailpit/compose.yml
   - selenium/compose.yml
+  - confluent/compose.yml
 
 networks:
     sail:
