@@ -3,18 +3,18 @@ services:
     image: 'axllent/mailpit:latest'
     restart: unless-stopped
     ports:
-      - '${FORWARD_MAILPIT_PORT:-1025}:1025'
-      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
-    volumes:
-#      - ./mailpit.crt:/etc/mailpit/mailpit.crt
-#      - ./mailpit.key:/etc/mailpit/mailpit.key
-      - ./credentials.txt:/etc/mailpit/.credentials
+      - '127.0.0.1:${FORWARD_MAILPIT_PORT:-1025}:1025'
+      - '127.0.0.1:${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+    # volumes:
+    #   - ./mailpit.crt:/etc/mailpit/mailpit.crt
+    #   - ./mailpit.key:/etc/mailpit/mailpit.key
+    #   - ./credentials.txt:/etc/mailpit/.credentials
     environment:
-#      - MP_SMTP_TLS_CERT=/etc/mailpit/mailpit.crt
-#      - MP_SMTP_TLS_KEY=/etc/mailpit/mailpit.key
-      - MP_UI_AUTH_FILE=/etc/mailpit/.credentials
-      - MP_SMTP_AUTH_FILE=/etc/mailpit/.credentials
+      # - MP_SMTP_TLS_CERT=/etc/mailpit/mailpit.crt
+      # - MP_SMTP_TLS_KEY=/etc/mailpit/mailpit.key
+      # - MP_UI_AUTH_FILE=/etc/mailpit/.credentials
+      # - MP_SMTP_AUTH_FILE=/etc/mailpit/.credentials
       - MP_SMTP_AUTH_ALLOW_INSECURE=true
-#      - MP_SMTP_STARTTLS=true
+      # - MP_SMTP_STARTTLS=true
     networks:
       - sail
