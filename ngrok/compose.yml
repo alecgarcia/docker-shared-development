@@ -5,7 +5,7 @@ services:
     volumes:
       - ../ngrok.yml:/ngrok.yml
     ports:
-      - 4040:4040
+      - 127.0.0.1:4040:4040
     command:
       - "start"
       - "--all"

@@ -3,7 +3,7 @@ services:
     image: 'mysql/mysql-server:8.0'
     restart: unless-stopped
     ports:
-      - '${FORWARD_DB_PORT:-3306}:3306'
+      - '127.0.0.1:${FORWARD_DB_PORT:-3306}:3306'
     environment:
       MYSQL_ROOT_PASSWORD: '${MYSQL_DB_PASSWORD}'
       MYSQL_PASSWORD: '${MYSQL_DB_PASSWORD}'

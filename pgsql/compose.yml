@@ -3,7 +3,7 @@ services:
     image: 'postgres:13'
     restart: unless-stopped
     ports:
-      - '${PSQL_DB_PORT:-5432}:5432'
+      - '127.0.0.1:${PSQL_DB_PORT:-5432}:5432'
     environment:
       PGPASSWORD: '${PSQL_DB_PASSWORD:-secret}'
       # POSTGRES_DB: '${PSQL_DB_DATABASE}'

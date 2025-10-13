@@ -3,7 +3,7 @@ services:
     image: 'redis:alpine'
     restart: unless-stopped
     ports:
-      - '${FORWARD_REDIS_PORT:-6379}:6379'
+      - '127.0.0.1:${FORWARD_REDIS_PORT:-6379}:6379'
     volumes:
       - './sail-redis:/data'
     networks:
