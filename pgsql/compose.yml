@@ -1,6 +1,9 @@
 services:
   pgsql:
-    image: 'postgres:13'
+    profiles:
+      - pgsql
+    container_name: shared-pgsql
+    image: 'pgvector/pgvector:pg17'
     restart: unless-stopped
     ports:
       - '127.0.0.1:${PSQL_DB_PORT:-5432}:5432'
@@ -10,10 +13,10 @@ services:
       POSTGRES_USER: '${PSQL_DB_USERNAME}'
       POSTGRES_PASSWORD: '${PSQL_DB_PASSWORD:-secret}'
     volumes:
-      - './sail-pgsql:/var/lib/postgresql/data'
+      - './shared-pgsql:/var/lib/postgresql/data'
       - './create-testing-database.sql:/docker-entrypoint-initdb.d/create-testing-database.sql'
     networks:
-      - sail
+      - shared-development
     healthcheck:
       test: [ "CMD", "pg_isready", "-q", "-d", "${PSQL_DB_DATABASE}", "-U", "${PSQL_DB_USERNAME}" ]
       retries: 3

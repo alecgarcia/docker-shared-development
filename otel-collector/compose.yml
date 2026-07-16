@@ -1,0 +1,15 @@
+services:
+  otel-collector:
+    profiles:
+      - otel-collector
+    image: otel/opentelemetry-collector:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "127.0.0.1:4318:4318"  # OTLP HTTP receiver
+      - "127.0.0.1:4317:4317"  # OTLP gRPC receiver (optional)
+    networks:
+      - shared-development
+    restart: unless-stopped

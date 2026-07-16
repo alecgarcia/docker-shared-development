@@ -1,0 +1,5 @@
+# Fragment for other projects: use "include" or copy the networks block.
+# See README "Connecting your project to the shared network."
+networks:
+  shared-development:
+    external: true

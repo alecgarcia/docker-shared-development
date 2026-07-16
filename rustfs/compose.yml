@@ -1,0 +1,41 @@
+# RustFS – S3-compatible object storage (https://rustfs.com / https://github.com/rustfs/rustfs)
+services:
+  rustfs:
+    profiles:
+      - rustfs
+    container_name: shared-rustfs
+    image: rustfs/rustfs:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - '127.0.0.1:${FORWARD_RUSTFS_API_PORT:-9000}:9000'
+      - '127.0.0.1:${FORWARD_RUSTFS_CONSOLE_PORT:-9001}:9001'
+    environment:
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
+      RUSTFS_CORS_ALLOWED_ORIGINS: "*"
+      RUSTFS_CONSOLE_CORS_ALLOWED_ORIGINS: "*"
+    volumes:
+      - rustfs-data:/data
+    networks:
+      - shared-development
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh",
+          "-c",
+          "curl -fsS http://127.0.0.1:9000/health >/dev/null && curl -fsS http://127.0.0.1:9001/rustfs/console/health >/dev/null",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  rustfs-data:
+    driver: local

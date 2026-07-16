@@ -1,14 +1,20 @@
+# Every service uses a Compose profile; enable with COMPOSE_PROFILES in .env (comma-separated).
+# Profiles: mysql, pgsql, redis, otel-collector, ngrok, nginx-proxy, meilisearch, mailpit, selenium, rustfs, confluent, reverb
 include:
   - nginx-proxy/compose.yml
   - ngrok/compose.yml
   - mysql/compose.yml
   - pgsql/compose.yml
   - redis/compose.yml
+  - otel-collector/compose.yml
   - meilisearch/compose.yml
   - mailpit/compose.yml
   - selenium/compose.yml
+  - rustfs/compose.yml
   - confluent/compose.yml
+  - reverb-host/compose.yml
 
 networks:
-    sail:
-        driver: bridge
+  shared-development:
+    name: shared-development
+    driver: bridge

@@ -1,0 +1,39 @@
+# Laravel Reverb host — shared WebSocket server for multiple Laravel apps (see README.md).
+services:
+  reverb:
+    profiles:
+      - reverb
+    container_name: shared-reverb
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FORWARD_REVERB_PORT:-8080}:8080"
+    environment:
+      APP_NAME: ReverbHost
+      APP_ENV: production
+      APP_DEBUG: "false"
+      # Interpolated from the shell / project .env (repo root when you `docker compose` there).
+      APP_KEY: "${REVERB_HOST_APP_KEY:?REVERB_HOST_APP_KEY is unset. Set it in shared-development/.env, then run docker compose from the repo root, or from reverb-host/ use docker compose -f ../docker-compose.yml build reverb}"
+      LOG_CHANNEL: stderr
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: "8080"
+      REVERB_SCALING_ENABLED: ${REVERB_SCALING_ENABLED:-false}
+      REDIS_URL: ${REVERB_REDIS_URL:-}
+      REDIS_HOST: ${REVERB_REDIS_HOST:-shared-redis}
+      REDIS_PORT: ${REVERB_REDIS_PORT:-6379}
+      REDIS_PASSWORD: ${REVERB_REDIS_PASSWORD:-}
+      REDIS_USERNAME: ${REVERB_REDIS_USERNAME:-}
+      REDIS_DB: ${REVERB_REDIS_DB:-0}
+    volumes:
+      - ./apps.json:/app/apps.json:ro
+    networks:
+      - shared-development
+    healthcheck:
+      test:
+        ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1',8080)!==false?0:1);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

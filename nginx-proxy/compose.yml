@@ -1,11 +1,14 @@
 services:
   nginx-proxy:
+    profiles:
+      - nginx-proxy
+    container_name: shared-nginx-proxy
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
     ports:
-      # Public HTTP Port:
+      # Public HTTP Port (8080 to avoid conflict with Laravel Herd):
       - '127.0.0.1:80:80'
-      # Public HTTPS Prot:
+      # Public HTTPS Port (8443 to avoid conflict with Laravel Herd):
       - '127.0.0.1:443:443'
       # Admin Web Port:
       - '127.0.0.1:81:81'
@@ -17,3 +20,5 @@ services:
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - shared-development

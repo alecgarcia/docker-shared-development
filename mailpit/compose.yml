@@ -1,5 +1,8 @@
 services:
   mailpit:
+    profiles:
+      - mailpit
+    container_name: shared-mailpit
     image: 'axllent/mailpit:latest'
     restart: unless-stopped
     ports:
@@ -15,6 +18,7 @@ services:
       # - MP_UI_AUTH_FILE=/etc/mailpit/.credentials
       # - MP_SMTP_AUTH_FILE=/etc/mailpit/.credentials
       - MP_SMTP_AUTH_ALLOW_INSECURE=true
+      - MP_UI_AUTH=${MP_UI_AUTH:-}
       # - MP_SMTP_STARTTLS=true
     networks:
-      - sail
+      - shared-development

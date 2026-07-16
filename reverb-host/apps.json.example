@@ -1,0 +1,26 @@
+[
+  {
+    "app_id": "app-one",
+    "key": "change-me-app-one-key",
+    "secret": "change-me-app-one-secret",
+    "allowed_origins": ["*"],
+    "options": {
+      "host": "localhost",
+      "port": 8080,
+      "scheme": "http",
+      "useTLS": false
+    }
+  },
+  {
+    "app_id": "app-two",
+    "key": "change-me-app-two-key",
+    "secret": "change-me-app-two-secret",
+    "allowed_origins": ["http://localhost:5173", "https://another-project.test"],
+    "options": {
+      "host": "localhost",
+      "port": 8080,
+      "scheme": "http",
+      "useTLS": false
+    }
+  }
+]

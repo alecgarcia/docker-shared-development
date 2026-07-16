@@ -1,7 +1,12 @@
 services:
   ngrok:
+    profiles:
+      - ngrok
+    container_name: shared-ngrok
     image: ngrok/ngrok
     restart: unless-stopped
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     volumes:
       - ../ngrok.yml:/ngrok.yml
     ports:
@@ -12,4 +17,4 @@ services:
       - "--config"
       - "ngrok.yml"
     networks:
-      - sail
+      - shared-development

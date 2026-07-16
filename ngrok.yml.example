@@ -1,0 +1,17 @@
+# Copy to ngrok.yml and add your tunnel definitions.
+# Get your authtoken from https://dashboard.ngrok.com/get-started/your-authtoken
+# Set NGROK_AUTHTOKEN in .env (never commit .env).
+
+version: "2"
+# authtoken: set via NGROK_AUTHTOKEN in .env
+tunnels:
+  example:
+    proto: http
+    addr: host.docker.internal:3000
+    domain: myapp-alec.ngrok.app
+  # Shared Laravel Reverb (repo reverb-host/). Use an `http` tunnel; ngrok forwards WebSocket upgrades.
+  # Port must match FORWARD_REVERB_PORT in shared-development/.env (default 8080).
+  shared-reverb:
+    proto: http
+    addr: http://host.docker.internal:8080
+    # domain: your-name.ngrok.app   # optional reserved domain; omit for a random ngrok URL

@@ -1,5 +1,7 @@
 services:
   selenium:
+    profiles:
+      - selenium
     image: selenium/standalone-chromium
     restart: unless-stopped
     extra_hosts:
@@ -7,4 +9,4 @@ services:
     volumes:
       - '/dev/shm:/dev/shm'
     networks:
-      - sail
+      - shared-development

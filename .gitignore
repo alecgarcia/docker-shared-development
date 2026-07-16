@@ -1,4 +1,7 @@
 .env
 ngrok.yml
+reverb-host/apps.json
+reverb-host/conversation-relay-server.js
+.cursor/
 .DS_Store
 .idea

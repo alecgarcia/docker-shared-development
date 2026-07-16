@@ -1,5 +1,8 @@
 services:
   mysql:
+    profiles:
+      - mysql
+    container_name: shared-mysql
     image: 'mysql/mysql-server:8.0'
     restart: unless-stopped
     ports:
@@ -10,10 +13,10 @@ services:
       MYSQL_USER: '${MYSQL_DB_USERNAME}'
       MYSQL_DATABASE: '${MYSQL_DB_DATABASE}'
     volumes:
-      - './sail-mysql:/var/lib/mysql'
+      - './shared-mysql:/var/lib/mysql'
       - './create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
     networks:
-      - sail
+      - shared-development
     healthcheck:
       test:
         - CMD
@@ -22,6 +25,3 @@ services:
         - '-p${MYSQL_DB_PASSWORD}'
       retries: 3
       timeout: 5s
-volumes:
-    sail-mysql:
-        driver: local
