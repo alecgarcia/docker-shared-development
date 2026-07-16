@@ -1,5 +1,4 @@
 apps.json
-conversation-relay-server.js
 /.phpunit.cache
 /node_modules
 /public/build
