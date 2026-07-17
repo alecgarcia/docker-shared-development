@@ -16,7 +16,7 @@ Docker Compose starts **only** services whose profile name appears in **`COMPOSE
 | `nginx-proxy` | nginx-proxy-manager | `shared-nginx-proxy` |
 | `meilisearch` | Meilisearch | `shared-meilisearch` |
 | `mailpit` | Mailpit (SMTP + UI) | `shared-mailpit` |
-| `selenium` | Selenium (Chromium) | (auto-named) |
+| `selenium` | Selenium (Chromium) | `selenium` (WebDriver at `selenium:4444` on the network; no host port) |
 | `rustfs` | RustFS (S3-compatible storage) | `shared-rustfs` |
 | `reverb` | Laravel Reverb (shared WebSockets) | `shared-reverb` |
 | `confluent` | Kafka / Schema Registry / ksqlDB stack | `zookeeper`, `broker`, etc. |
@@ -41,22 +41,77 @@ See `.env.example` for all environment variables (ports, credentials, `NGROK_AUT
 | ngrok | Latest | 4040 (dashboard) | `ngrok` |
 | Meilisearch | Latest | 7700 | `meilisearch` |
 | Mailpit | Latest | 1025 (SMTP), 8025 (dashboard) | `mailpit` |
-| Selenium | standalone-chromium | (no host port in compose; reachable as `selenium:4444` on `shared-development`) | `selenium` |
+| Selenium | standalone-chromium | WebDriver `selenium:4444` on `shared-development` only (no host port) | `selenium` |
 | RustFS | Latest | 9000 (S3 API), 9001 (console) | `rustfs` |
 | Laravel Reverb | 1.x (Laravel 11 host) | `${FORWARD_REVERB_PORT:-8080}` (WebSocket / Pusher protocol) | `reverb` |
 | Confluent stack | 7.3.x | 2181, 9092, 8081, 8083, 8088, 9021, … | `confluent` |
 
-Host ports can be overridden per service via `.env` (e.g. `FORWARD_DB_PORT`, `FORWARD_RUSTFS_API_PORT`).
+Host ports can be overridden per service via `.env` (e.g. `FORWARD_DB_PORT`, `FORWARD_RUSTFS_API_PORT`, `FORWARD_REVERB_PORT`).
 
-## Quick Start
+## First-time setup
+
+**Prerequisites:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine + Compose v2) and Git.
+
+1. **Clone and enter the repo**
+
+   ```bash
+   git clone git@github.com:alecgarcia/docker-shared-development.git
+   cd docker-shared-development
+   ```
+
+2. **Create `.env` from the template**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+3. **Choose which services to run** — edit **`COMPOSE_PROFILES`** in `.env` (comma-separated, **no spaces**). Every service is opt-in; if this is empty, nothing starts. A common baseline:
+
+   ```env
+   COMPOSE_PROFILES=mysql,pgsql,redis,otel-collector
+   ```
+
+   Add other profile names from the [Compose profiles](#compose-profiles) table as you need them (`ngrok`, `reverb`, `mailpit`, etc.).
+
+4. **Start the stack** (from the repo root — not from subfolders like `reverb-host/`):
+
+   ```bash
+   docker compose up -d
+   ```
+
+5. **Confirm containers are up**
+
+   ```bash
+   docker compose ps
+   ```
+
+   Healthy services show `(healthy)` where a healthcheck is defined.
+
+### Optional: ngrok
+
+Only if you need public HTTPS URLs to services on your Mac (webhooks, mobile testing, etc.).
+
+1. Add **`ngrok`** to **`COMPOSE_PROFILES`**.
+2. Set **`NGROK_AUTHTOKEN`** in `.env` ([get a token](https://dashboard.ngrok.com/get-started/your-authtoken)).
+3. Copy the tunnel config and edit domains / backend ports:
+
+   ```bash
+   cp ngrok.yml.example ngrok.yml
+   ```
+
+4. Run `docker compose up -d` again. Inspect tunnels at **http://127.0.0.1:4040**.
+
+See [Customization → ngrok](#customization) and [Laravel Reverb over ngrok](#laravel-reverb-shared-websockets) if you tunnel WebSockets.
+
+### Optional: Laravel Reverb (shared WebSockets)
+
+See [Laravel Reverb (shared WebSockets)](#laravel-reverb-shared-websockets) below — extra steps (`apps.json`, `REVERB_HOST_APP_KEY`, `docker compose build reverb`) are required before Reverb will start.
+
+## Quick Start (day to day)
+
+After [first-time setup](#first-time-setup), from the repo root:
 
 ```bash
-cd /path/to/shared-development
-
-# First time: copy env and set COMPOSE_PROFILES (see table above)
-cp .env.example .env
-
-# Start everything listed in COMPOSE_PROFILES
 docker compose up -d
 
 # Stop and remove containers for this project
@@ -78,7 +133,8 @@ Choose the right connection pattern based on where your code is running:
 
 **Connection string**: `127.0.0.1:port`
 
-**Example (.env file)**:
+**Example (.env file)** — use the same usernames and passwords as in your root `.env` / [Default Credentials](#default-credentials):
+
 ```env
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -97,12 +153,19 @@ REDIS_PORT=6379
 
 **Connection string**: `container-name:port` — use the fixed hostnames (e.g. `shared-mysql`, `shared-pgsql`, `shared-redis`). The Docker network name is **`shared-development`**.
 
-**Example (.env file)**:
+**Example (.env file)** — PostgreSQL defaults use password **`secret`** unless you changed **`PSQL_DB_PASSWORD`**:
+
 ```env
 DB_HOST=shared-mysql
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=password
+
+# PostgreSQL (when using pgsql profile)
+# DB_HOST=shared-pgsql
+# DB_PORT=5432
+# DB_USERNAME=root
+# DB_PASSWORD=secret
 
 REDIS_HOST=shared-redis
 REDIS_PORT=6379
@@ -155,6 +218,14 @@ REDIS_PORT=6379
 | nginx-proxy (HTTPS) | `127.0.0.1:443` | N/A | N/A |
 | nginx-proxy (Admin) | `127.0.0.1:81` | N/A | N/A |
 | RustFS (S3 API) | `127.0.0.1:9000` | `shared-rustfs:9000` | `host.docker.internal:9000` |
+| Laravel Reverb (WebSocket) | `127.0.0.1:${FORWARD_REVERB_PORT:-8080}` | `shared-reverb:8080` | `host.docker.internal:${FORWARD_REVERB_PORT:-8080}` |
+| Meilisearch | `http://127.0.0.1:${FORWARD_MEILISEARCH_PORT:-7700}` | `http://shared-meilisearch:7700` | `http://host.docker.internal:${FORWARD_MEILISEARCH_PORT:-7700}` |
+| Mailpit (SMTP) | `127.0.0.1:${FORWARD_MAILPIT_PORT:-1025}` | `shared-mailpit:1025` | `host.docker.internal:${FORWARD_MAILPIT_PORT:-1025}` |
+| Mailpit (web UI) | `http://127.0.0.1:${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}` | `http://shared-mailpit:8025` | `http://host.docker.internal:${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}` |
+| OpenTelemetry (OTLP HTTP) | `http://127.0.0.1:4318` | `http://otel-collector:4318` | `http://host.docker.internal:4318` |
+| Selenium WebDriver | *(no host port)* | `http://selenium:4444` | *Use Pattern B* (no host port published by default) |
+
+Use the port variables from `.env` when you override defaults. Reverb’s internal container port is always **8080**; the host uses **`FORWARD_REVERB_PORT`**.
 
 ## Domain Routing with nginx-proxy-manager
 
@@ -212,7 +283,7 @@ Database: shared-database
 ### PostgreSQL
 ```
 Username: root
-Password: password
+Password: secret (default; set via PSQL_DB_PASSWORD in .env)
 ```
 
 ### Redis
@@ -227,8 +298,8 @@ Copy `.env.example` to `.env`, then edit `.env` to customize:
 - **`COMPOSE_PROFILES`** (required) — Comma-separated list of services to run (no spaces). **Every** service is opt-in, including databases. Profile names match the service: `mysql`, `pgsql`, `redis`, `otel-collector`, `ngrok`, `nginx-proxy`, `meilisearch`, `mailpit`, `selenium`, `rustfs`, `reverb`, `confluent`. Example typical stack: `COMPOSE_PROFILES=mysql,pgsql,redis,otel-collector,ngrok`. If **`COMPOSE_PROFILES` is empty or unset, no containers start.** After changing profiles, run `docker compose up -d`. If you upgrade from an older `.env` that only listed optional profiles, add `mysql,pgsql,redis,otel-collector` (and any others you need).
 - Port mappings (`FORWARD_DB_PORT`, `PSQL_DB_PORT`, `FORWARD_REDIS_PORT`, etc.)
 - Database credentials (MySQL, PostgreSQL)
-- **ngrok**: Set `NGROK_AUTHTOKEN` in `.env` and include profile `ngrok` in `COMPOSE_PROFILES`. Copy `ngrok.yml.example` to `ngrok.yml` (gitignored) and define your tunnels there.
-- **Laravel Reverb** (profile `reverb`): Set `REVERB_HOST_APP_KEY` in root `.env` (generate with `cd reverb-host && php artisan key:generate --show`). Copy **`reverb-host/apps.json.example`** to **`reverb-host/apps.json`** and add one entry per Laravel project (`app_id`, `key`, `secret`). See [`reverb-host/README.md`](reverb-host/README.md).
+- **ngrok**: Set `NGROK_AUTHTOKEN` in `.env` and include profile `ngrok` in `COMPOSE_PROFILES`. Copy `ngrok.yml.example` to `ngrok.yml` (gitignored) and define your tunnels there. For **Laravel Reverb**, use an `http` tunnel to `http://host.docker.internal:${FORWARD_REVERB_PORT:-8080}` (see `ngrok.yml.example` → `shared-reverb` and [`reverb-host/README.md`](reverb-host/README.md#ngrok-public-websocket-url)).
+- **Laravel Reverb** (profile `reverb`): Set `REVERB_HOST_APP_KEY` in root `.env` (generate with `cd reverb-host && php artisan key:generate --show`). Copy **`reverb-host/apps.json.example`** to **`reverb-host/apps.json`** and add one entry per Laravel project (`app_id`, `key`, `secret`). First time: **`docker compose build reverb`**, then `docker compose up -d`. See [Laravel Reverb (shared WebSockets)](#laravel-reverb-shared-websockets) and [`reverb-host/README.md`](reverb-host/README.md).
 
 ### RustFS, Mailpit, and Meilisearch
 
@@ -246,10 +317,68 @@ COMPOSE_PROFILES=mysql,pgsql,redis,otel-collector,meilisearch,mailpit,rustfs
 | **Mailpit** | `mailpit` | SMTP `127.0.0.1:${FORWARD_MAILPIT_PORT:-1025}`; web UI `http://127.0.0.1:${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}`. Optional UI auth: `MP_UI_AUTH` in `.env` | SMTP `shared-mailpit:1025`; same ports inside the network |
 | **RustFS** | `rustfs` | S3 API `http://127.0.0.1:${FORWARD_RUSTFS_API_PORT:-9000}`; console `http://127.0.0.1:${FORWARD_RUSTFS_CONSOLE_PORT:-9001}`. Keys: `RUSTFS_ACCESS_KEY` / `RUSTFS_SECRET_KEY` | Endpoint `http://shared-rustfs:9000` (use the same keys as MinIO-style access/secret) |
 
-- **Laravel**: Meilisearch — `MEILISEARCH_HOST=http://127.0.0.1` and `MEILISEARCH_KEY=` (or host `shared-meilisearch` from Sail/other containers). Mail — `MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT` = `FORWARD_MAILPIT_PORT`. Filesystems using S3 — `AWS_ENDPOINT=http://127.0.0.1:9000`, `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` = RustFS keys, `AWS_USE_PATH_STYLE_ENDPOINT=true`, `AWS_URL` / bucket name as usual.
+- **Laravel**: Meilisearch — `MEILISEARCH_HOST=http://127.0.0.1:7700` and `MEILISEARCH_KEY=` (include the port; from containers use `http://shared-meilisearch:7700`). Mail — `MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT` = `FORWARD_MAILPIT_PORT`. Filesystems using S3 — `AWS_ENDPOINT=http://127.0.0.1:9000`, `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` = RustFS keys, `AWS_USE_PATH_STYLE_ENDPOINT=true`, `AWS_URL` / bucket name as usual. Traces — point your OTLP exporter at `http://127.0.0.1:4318` (host) or `http://otel-collector:4318` (containers); see [`otel-collector/README.md`](otel-collector/README.md).
 - More detail: [`rustfs/README.md`](rustfs/README.md).
 
+### Laravel Reverb (shared WebSockets)
+
+One **shared-reverb** container serves WebSockets for **multiple** Laravel apps. Each app has its own credentials in **`reverb-host/apps.json`** (not committed).
+
+**Enable the stack**
+
+1. Add **`reverb`** to **`COMPOSE_PROFILES`** (add **`redis`** too if you enable horizontal scaling).
+2. Copy and edit app credentials:
+
+   ```bash
+   cp reverb-host/apps.json.example reverb-host/apps.json
+   ```
+
+3. Generate the host app key and set it in **root** `.env`:
+
+   ```bash
+   cd reverb-host && php artisan key:generate --show
+   # → paste as REVERB_HOST_APP_KEY=base64:... in ../.env
+   ```
+
+4. Build and start (from repo root):
+
+   ```bash
+   docker compose build reverb
+   docker compose up -d
+   ```
+
+5. Verify: `docker compose ps reverb` shows **healthy**; `curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8080/` should return **404** (normal for Reverb).
+
+**Wire a Laravel consumer app** — use the same `app_id`, `key`, and `secret` as one row in `apps.json`. Example for local Vite/Echo:
+
+```env
+BROADCAST_CONNECTION=reverb
+REVERB_APP_ID=app-one
+REVERB_APP_KEY=change-me-app-one-key
+REVERB_APP_SECRET=change-me-app-one-secret
+REVERB_HOST=127.0.0.1
+REVERB_PORT=8080
+REVERB_SCHEME=http
+VITE_REVERB_APP_KEY="${REVERB_APP_KEY}"
+VITE_REVERB_HOST="${REVERB_HOST}"
+VITE_REVERB_PORT="${REVERB_PORT}"
+VITE_REVERB_SCHEME="${REVERB_SCHEME}"
+```
+
+**Public WebSockets (ngrok)** — add profile **`ngrok`**, configure an `http` tunnel to `http://host.docker.internal:${FORWARD_REVERB_PORT:-8080}` in `ngrok.yml` (see `ngrok.yml.example` → `shared-reverb`), then update `apps.json` **`options`** and consumer **`VITE_REVERB_*`** for `https` / port **443**. Full steps: [`reverb-host/README.md`](reverb-host/README.md).
+
+**Publishing from Docker** — apps on `shared-development` can reach **`http://shared-reverb:8080`**; browsers still use `127.0.0.1` or ngrok unless you configure otherwise.
+
 ## Troubleshooting
+
+### Reverb container exits or compose fails on `REVERB_HOST_APP_KEY`
+
+**Issue**: `docker compose up` errors about **`REVERB_HOST_APP_KEY`**, or **`shared-reverb`** keeps restarting.
+
+**Solution**:
+1. Set **`REVERB_HOST_APP_KEY`** in root `.env` (`cd reverb-host && php artisan key:generate --show`).
+2. Ensure **`reverb-host/apps.json`** exists (`cp reverb-host/apps.json.example reverb-host/apps.json`).
+3. Run **`docker compose build reverb`** from the **repo root**, then **`docker compose up -d reverb`**.
 
 ### Container can't connect to database
 
@@ -337,7 +466,7 @@ Services that define `networks: - shared-development` join the **`shared-develop
 
 **Fixed DNS names** (when the corresponding profile is running):
 
-- `shared-mysql`, `shared-pgsql`, `shared-redis`, `shared-ngrok`, `shared-nginx-proxy`, `shared-meilisearch`, `shared-mailpit`, `shared-rustfs`, `shared-reverb`, `otel-collector`
+- `shared-mysql`, `shared-pgsql`, `shared-redis`, `shared-ngrok`, `shared-nginx-proxy`, `shared-meilisearch`, `shared-mailpit`, `shared-rustfs`, `shared-reverb`, `otel-collector`, `selenium` (Compose service name; WebDriver port **4444**)
 
 The Confluent stack uses its own container names (`broker`, `zookeeper`, …) on the same network when profile `confluent` is enabled.
 
@@ -350,6 +479,7 @@ Published ports are bound to **`127.0.0.1`** unless noted otherwise, so services
 | `docker-compose.yml` | Root compose: `include`s all service fragments + `shared-development` network |
 | `docker-compose.shared-network.yml` | Fragment for **other** projects: declares `shared-development` as `external: true` |
 | `.env.example` | Template for `.env` (`COMPOSE_PROFILES`, DB/redis ports, ngrok, RustFS, Reverb, …) |
-| `reverb-host/README.md` | Shared Laravel Reverb: `apps.json`, consumer `.env`, scaling |
+| `ngrok.yml.example` | Template for `ngrok.yml` (copy to `ngrok.yml`; gitignored) |
+| `reverb-host/README.md` | Shared Laravel Reverb: `apps.json`, consumer `.env`, ngrok, scaling |
 | `rustfs/README.md` | RustFS-specific notes (S3 client, credentials) |
 | `otel-collector/README.md` | OTLP endpoints and local tracing |
