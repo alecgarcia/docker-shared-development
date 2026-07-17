@@ -1,3 +1,4 @@
+*.log
 apps.json
 /.phpunit.cache
 /.php-cs-fixer.cache
