@@ -1,0 +1,92 @@
+
+*** Shift SKU: 12
+*** Shift Version: a2987fd39c72c4848e286e54a3808a2523b7b0a1 (2026-07-01)
+
+
+*** Running within: /project/reverb-host
+
+*** Completed: Shift\Tasks\Laravel\DetermineMajorVersion
+*** Completed: Shift\Tasks\Laravel\UpsellSlimmer
+*** Completed: Shift\Tasks\Laravel\UpsellConsolidateNamespace
+>>> Event: formatting with Pint using laravel against defaults
+*** Completed: Shift\Tasks\Laravel\FormatCode
+*** Completed: Shift\Tasks\Php\ShortArraySyntax
+*** Completed: Shift\Tasks\Php\ClassProperty
+*** Completed: Shift\Tasks\Workbench\OptionalToNullsafe
+*** Completed: Shift\Tasks\Workbench\FakerMethods
+*** Completed: Shift\Tasks\Workbench\RemoveModelProperty
+*** Completed: Shift\Tasks\Laravel\Eight\FluentRouteMethods
+*** Completed: Shift\Tasks\Laravel\Fixer\ClassBasedRoutes
+*** Completed: Shift\Tasks\Laravel\Nine\LangFolder
+>>> Event: project did not contain lang folder
+*** Completed: Shift\Tasks\Laravel\Fixer\SlimLangFiles
+>>> Event: matched core file: artisan with version: 11.6.1
+>>> Event: matched core file: public/.htaccess with version: 12.11.2
+>>> Event: matched core file: public/index.php with version: 11.6.1
+>>> Event: could not upgrade files Data: [".gitignore"]
+*** Completed: Shift\Tasks\Laravel\Twelve\CoreFiles
+*** Completed: Shift\Tasks\Laravel\Twelve\PhpAttributes
+*** Completed: Shift\Tasks\Laravel\Twelve\ValidatesRequests
+*** Completed: Shift\Tasks\Laravel\Twelve\GateFacade
+*** Completed: Shift\Tasks\Laravel\Twelve\ControllerMiddleware
+*** Completed: Shift\Tasks\Laravel\Twelve\DispatchesJobs
+*** Completed: Shift\Tasks\Laravel\Twelve\ControllerInheritance
+>>> Event: matched core file: config/broadcasting.php with version: 13.8.0
+>>> Event: matched core file: config/broadcasting.php with version: 12.0.0
+>>> Event: matched core file: config/cache.php with version: 12.0.0
+>>> Event: matched core file: config/cache.php with version: 12.0.0
+>>> Event: matched core file: config/database.php with version: 11.6.1
+>>> Event: matched core file: config/database.php with version: 11.6.1
+>>> Event: matched core file: config/filesystems.php with version: 12.0.0
+>>> Event: matched core file: config/filesystems.php with version: 12.0.0
+>>> Event: matched core file: config/logging.php with version: 12.0.0
+>>> Event: matched core file: config/logging.php with version: 12.0.0
+>>> Event: matched core file: config/mail.php with version: 12.0.0
+>>> Event: matched core file: config/mail.php with version: 12.0.0
+>>> Event: matched core file: config/queue.php with version: 12.0.0
+>>> Event: matched core file: config/queue.php with version: 12.0.0
+>>> Event: matched core file: config/services.php with version: 12.0.0
+>>> Event: matched core file: config/services.php with version: 12.0.0
+>>> Event: matched core file: config/session.php with version: 12.0.9
+>>> Event: matched core file: config/session.php with version: 12.0.9
+*** Completed: Shift\Tasks\Laravel\Twelve\Config
+>>> Event: matched core file: .env.example with version: 11.6.1
+>>> Event: found APP_TIMEZONE environment variable
+*** Completed: Shift\Tasks\Laravel\Twelve\EnvVariables
+*** Completed: Shift\Tasks\Laravel\Twelve\UuidTrait
+>>> Event: found composer dev script
+*** Completed: Shift\Tasks\Laravel\Twelve\ComposerScripts
+*** Completed: Shift\Tasks\Laravel\Twelve\Storage
+>>> Event: app contained custom PHP dependency of ^8.2
+>>> Event: app contained dependency for fakerphp/faker of ^1.23
+>>> Event: app contained dependency for laravel/pint of ^1.13
+>>> Event: app contained dependency for mockery/mockery of ^1.6
+*** Completed: Shift\Tasks\Laravel\Twelve\Dependencies
+*** Completed: Shift\Tasks\PerformCommit
+*** Completed: Shift\Tasks\Laravel\Twelve\NpmDependencies
+*** Completed: Shift\Tasks\Laravel\Ten\PhpUnit10
+*** Completed: Shift\Tasks\Php\CiGenerator\CheckPhpUnitConfig
+*** Completed: Shift\Tasks\Laravel\Nine\AnonymousMigrations
+*** Completed: Shift\Tasks\Laravel\Ten\PasswordResetTokens
+*** Completed: Shift\Tasks\Laravel\Eleven\ModelCasts
+*** Completed: Shift\Tasks\Workbench\Php\PhpUnitMethodSignatures
+find: app/Http/Middleware: No such file or directory
+find: app/Console/Commands: No such file or directory
+find: app/Http/Middleware: No such file or directory
+find: app/Http/Requests: No such file or directory
+find: app/Http/Resources: No such file or directory
+find: app/Jobs: No such file or directory
+find: app/Events: No such file or directory
+find: app/Listeners: No such file or directory
+find: app/Policies: No such file or directory
+find: app/Observers: No such file or directory
+find: app/Notifications: No such file or directory
+*** Completed: Shift\Tasks\Laravel\Eleven\TypeHints
+*** Completed: Shift\Tasks\Laravel\Twelve\Carbon3
+>>> Event: found instances of container methods
+*** Completed: Shift\Tasks\Laravel\Twelve\Miscellaneous
+*** Completed: Shift\Tasks\Laravel\Twelve\DefaultFiles
+*** Completed: Shift\Tasks\Laravel\FixNamespace
+>>> Event: formatting with Pint using laravel against defaults
+*** Completed: Shift\Tasks\Laravel\Cleanup
+*** Completed: Shift\Tasks\Laravel\RepublishReminder
