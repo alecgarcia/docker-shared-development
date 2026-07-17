@@ -1,5 +1,6 @@
 apps.json
 /.phpunit.cache
+/.php-cs-fixer.cache
 /node_modules
 /public/build
 /public/hot
