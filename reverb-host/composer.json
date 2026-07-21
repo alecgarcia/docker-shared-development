@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.5",
         "laravel/framework": "^13.18",
         "laravel/reverb": "^1.9",
         "laravel/tinker": "^3.0"
@@ -79,6 +79,9 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
+        "platform": {
+            "php": "8.5.0"
+        },
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,

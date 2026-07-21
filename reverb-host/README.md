@@ -147,4 +147,4 @@ Uses `REVERB_SERVER_*` from `reverb-host/.env` if set.
 | `apps.json.example` | Template |
 | `config/reverb.php` | Loads `apps.json` into Reverb |
 | `compose.yml` | Fragment included by repo root `docker-compose.yml` |
-| `Dockerfile` | PHP 8.3 CLI image with `pcntl`, `sockets` |
+| `Dockerfile` | PHP 8.5 CLI image with `pcntl`, `sockets` |
