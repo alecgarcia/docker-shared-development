@@ -58,6 +58,8 @@ Start with the [First-time setup](../README.md#first-time-setup) and [Laravel Re
 
 Reverb listens on **`127.0.0.1:${FORWARD_REVERB_PORT:-8080}`** on the host and as **`shared-reverb:8080`** on the `shared-development` Docker network.
 
+If you do **not** use Reverb, leave **`reverb`** out of **`COMPOSE_PROFILES`**. If **`shared-reverb`** was started before, stop it from the repo root: **`docker compose stop reverb`** (profiles alone do not stop existing containers).
+
 ## ngrok (public WebSocket URL)
 
 Expose the same host port Reverb uses so browsers outside `localhost` can connect (phones, remote teammates, webhooks that open a socket).

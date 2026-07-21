@@ -371,16 +371,34 @@ VITE_REVERB_SCHEME="${REVERB_SCHEME}"
 
 ## Troubleshooting
 
-### Reverb container exits or compose fails on `REVERB_HOST_APP_KEY`
+### Reverb still running after removing `reverb` from `COMPOSE_PROFILES`
 
-**Issue**: `docker compose up` errors about **`REVERB_HOST_APP_KEY`**, or **`shared-reverb`** keeps restarting.
+**Issue**: `shared-reverb` stays up even though **`reverb`** is not in **`COMPOSE_PROFILES`**.
 
-**Solution**:
-1. Set **`REVERB_HOST_APP_KEY`** in root `.env` (`cd reverb-host && php artisan key:generate --show`).
-2. Ensure **`reverb-host/apps.json`** exists (`cp reverb-host/apps.json.example reverb-host/apps.json`).
-3. Run **`docker compose build reverb`** from the **repo root**, then **`docker compose up -d reverb`**.
+**Why**: Profiles control what **`docker compose up`** *starts*; they do **not** stop containers that are already running. **`restart: unless-stopped`** also brings Reverb back after a Docker daemon restart if it was ever started.
 
-### Container can't connect to database
+**Solution** (from the repo root):
+
+```bash
+docker compose stop reverb
+# optional: remove the container so it cannot restart until the profile is enabled again
+docker compose rm -f reverb
+```
+
+After changing profiles, **`docker compose ps`** should list only the services you expect. To recreate the whole stack: **`docker compose down`** then **`docker compose up -d`** (stops everything in this project, not only Reverb).
+
+### Reverb container exits or compose fails on missing config
+
+**Issue**: **`shared-reverb`** keeps restarting, or logs show missing **`APP_KEY`** / **`apps.json`**.
+
+**Solution** (only when profile **`reverb`** is enabled):
+
+1. Add **`reverb`** to **`COMPOSE_PROFILES`**.
+2. Set **`REVERB_HOST_APP_KEY`** in root `.env` (`cd reverb-host && php artisan key:generate --show`).
+3. Ensure **`reverb-host/apps.json`** exists (`cp reverb-host/apps.json.example reverb-host/apps.json`).
+4. Run **`docker compose build reverb`** from the **repo root**, then **`docker compose up -d reverb`**.
+
+If you do **not** use Reverb, omit **`reverb`** from **`COMPOSE_PROFILES`** and **`docker compose stop reverb`** if an old container is still running (see above). You do **not** need **`REVERB_HOST_APP_KEY`** when the profile is off.
 
 **Issue**: Getting "connection refused" errors
 

@@ -14,8 +14,9 @@ services:
       APP_NAME: ReverbHost
       APP_ENV: production
       APP_DEBUG: "false"
-      # Interpolated from the shell / project .env (repo root when you `docker compose` there).
-      APP_KEY: "${REVERB_HOST_APP_KEY:?REVERB_HOST_APP_KEY is unset. Set it in shared-development/.env, then run docker compose from the repo root, or from reverb-host/ use docker compose -f ../docker-compose.yml build reverb}"
+      # Only required when profile `reverb` is enabled. Compose parses this even when Reverb is off,
+      # so do not use a required (?…) interpolation here or `docker compose up` fails for everyone.
+      APP_KEY: ${REVERB_HOST_APP_KEY:-}
       LOG_CHANNEL: stderr
       REVERB_SERVER_HOST: 0.0.0.0
       REVERB_SERVER_PORT: "8080"
