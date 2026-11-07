@@ -5,6 +5,7 @@ services:
     container_name: shared-pgsql
     image: 'pgvector/pgvector:pg17'
     restart: unless-stopped
+    command: ['postgres', '-c', 'max_locks_per_transaction=256']
     ports:
       - '127.0.0.1:${PSQL_DB_PORT:-5432}:5432'
     environment:
