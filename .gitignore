@@ -4,3 +4,6 @@ reverb-host/apps.json
 .cursor/
 .DS_Store
 .idea
+
+shift.log
+shift.md
